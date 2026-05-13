@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+      <title>42 TETRA — MMORPG powered by QATALYST‑2</title>
+      <style>
+            * {
+                  box-sizing: border-box;
+                  user-select: none;
+            }
+
+            body {
+                  background: linear-gradient(145deg, #0a0c12 0%, #0f121a 100%);
+                  font-family: 'Segoe UI', 'Courier New', 'Fira Code', monospace;
+                  margin: 0;
+                  min-height: 100vh;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  padding: 20px;
+            }
+
+            /* main game container */
+            .game-container {
+                  max-width: 1400px;
+                  width: 100%;
+                  background: rgba(10, 14, 23, 0.7);
+                  backdrop-filter: blur(2px);
+                  border-radius: 42px;
+                  border: 1px solid rgba(210, 180, 140, 0.3);
+                  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 2px #2a2418 inset, 0 0 0 4px #1e1a10 inset;
+                  overflow: hidden;
+            }
+
+            /* header golden ratio */
+            .header {
+                  background: #000000aa;
+                  padding: 12px 24px;
+                  border-bottom: 2px solid #d4af37;
+                  display: flex;
+                  justify-content: space-between;
+                  flex-wrap: wrap;
+                  font-weight: bold;
+                  text-shadow: 0 0 5px #ffd700;
+            }
+
+            .logo {
+                  font-size: 1.7rem;
+                  letter-spacing: 4px;
+                  color: #ffde9c;
+            }
+
+            .logo span {
+                  color: #ff9933;
+                  font-family: monospace;
+            }
+
+            .stats-header {
+                  display: flex;
+                  gap: 24px;
+                  color: #bfd9ff;
+            }
+
+            .stat {
+                  background: #0f1119;
+                  padding: 4px 12px;
+                  border-radius: 42px;
+                  border-left: 3px solid #f0b27a;
+            }
+
+            /* three column layout */
+            .dashboard {
+                  display: grid;
+                  grid-template-columns: 280px 1fr 300px;
+                  gap: 12px;
+                  padding: 18px;
+            }
+
+            /* left panel: map */
+            .map-panel {
+                  background: #07090fe0;
+                  border-radius: 28px;
+                  padding: 14px;
+                  border: 1px solid #3a2e1e;
+                  backdrop-filter: blur(4px);
+            }
+
+            .district-list {
+                  max-height: 400px;
+                  overflow-y: auto;
+                  font-size: 0.8rem;
+            }
+
+            .district {
+                  padding: 6px 8px;
+                  margin: 4px 0;
+                  background: #1a1e2a;
+                  border-radius: 28px;
+                  cursor: pointer;
+                  transition: 0.1s linear;
+                  font-family: monospace;
+                  border-left: 3px solid #ffb347;
+            }
+
+            .district.current {
+                  background: #2a2a3f;
+                  border-left: 6px solid gold;
+                  font-weight: bold;
+                  box-shadow: 0 0 8px gold;
+            }
+
+            .district:hover:not(.current) {
+                  background: #2b2f3e;
+                  transform: translateX(4px);
+            }
+
+            /* middle: actions & events */
+            .action-panel {
+                  background: #07090fe0;
+                  border-radius: 28px;
+                  padding: 14px;
+                  display: flex;
+                  flex-direction: column;
+            }
+
+            .action-buttons {
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 12px;
+                  margin-bottom: 24px;
+                  border-bottom: 1px dashed #aa8c54;
+                  padding-bottom: 18px;
+            }
+
+            .btn {
+                  background: #1e1f2c;
+                  border: none;
+                  color: #eedd99;
+                  font-weight: bold;
+                  padding: 8px 16px;
+                  border-radius: 42px;
+                  font-family: monospace;
+                  cursor: pointer;
+                  transition: 0.1s;
+                  box-shadow: 0 2px 5px black;
+            }
+
+            .btn-danger {
+                  background: #5a1e1e;
+                  color: #ffbc9a;
+            }
+
+            .btn-gold {
+                  background: #7a5a1e;
+                  border: 1px solid gold;
+            }
+
+            .btn:hover {
+                  transform: scale(0.97);
+                  filter: brightness(1.1);
+            }
+
+            .events-log {
+                  background: #03050b;
+                  border-radius: 24px;
+                  height: 300px;
+                  overflow-y: auto;
+                  padding: 12px;
+                  font-size: 0.8rem;
+                  font-family: monospace;
+            }
+
+            .event-entry {
+                  border-left: 3px solid #f7b05e;
+                  padding: 4px 8px;
+                  margin: 6px 0;
+                  background: #13161f;
+                  color: #b8d0ff;
+            }
+
+            /* right panel: stats + chat */
+            .stats-panel {
+                  background: #07090fe0;
+                  border-radius: 28px;
+                  padding: 14px;
+            }
+
+            .skill-bars {
+                  margin: 12px 0;
+            }
+
+            .skill {
+                  margin: 8px 0;
+            }
+
+            .skill-name {
+                  display: inline-block;
+                  width: 80px;
+                  font-weight: bold;
+            }
+
+            .bar-bg {
+                  background: #2a2418;
+                  display: inline-block;
+                  width: 120px;
+                  border-radius: 42px;
+                  overflow: hidden;
+                  vertical-align: middle;
+            }
+
+            .bar-fill {
+                  background: #e6b422;
+                  height: 12px;
+                  width: 0%;
+            }
+
+            .chat-box {
+                  margin-top: 20px;
+                  background: #010101aa;
+                  border-radius: 21px;
+                  padding: 10px;
+            }
+
+            .chat-messages {
+                  height: 180px;
+                  overflow-y: auto;
+                  font-size: 0.7rem;
+                  margin-bottom: 8px;
+            }
+
+            .chat-input {
+                  display: flex;
+                  gap: 5px;
+            }
+
+            .chat-input input {
+                  flex: 1;
+                  background: #1a1d2b;
+                  border: 1px solid #c9aa4b;
+                  color: #ffeaac;
+                  border-radius: 42px;
+                  padding: 6px 12px;
+            }
+
+            .footer {
+                  text-align: center;
+                  font-size: 0.65rem;
+                  padding: 12px;
+                  border-top: 1px solid #3a2e1e;
+                  color: #886e42;
+            }
+
+            ::-webkit-scrollbar {
+                  width: 6px;
+            }
+
+            ::-webkit-scrollbar-track {
+                  background: #1a1208;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                  background: #c99f3e;
+                  border-radius: 10px;
+            }
+
+            @media (max-width: 900px) {
+                  .dashboard {
+                        grid-template-columns: 1fr;
+                        gap: 16px;
+                  }
+            }
+      </style>
+</head>
+
+<body>
+      <div class="game-container">
+            <div class="header">
+                  <div class="logo">⚛️ 42 TETRA <span>| QATALYST-2 kernel</span></div>
+                  <div class="stats-header">
+                        <div class="stat">ψ <span id="psiValue">0.000421</span></div>
+                        <div class="stat">⏣ <span id="qubitAmt">420</span> Q</div>
+                        <div class="stat">🏆 Lv.<span id="playerLevel">1</span></div>
+                  </div>
+            </div>
+            <div class="dashboard">
+                  <!-- left map: 42 districts -->
+                  <div class="map-panel">
+                        <div style="margin-bottom:10px;"><span style="color:#ffcc77;">🗺️ TETRAHEDRAL DISTRICTS
+                                    (γₙ)</span><br><span style="font-size:0.7rem;">click to travel (cost: 4 Q)</span>
+                        </div>
+                        <div id="districtList" class="district-list"></div>
+                  </div>
+
+                  <!-- middle: actions and log -->
+                  <div class="action-panel">
+                        <div class="action-buttons">
+                              <button class="btn" id="actionMug">💰 MUG (crime)</button>
+                              <button class="btn" id="actionHack">💻 HACK (3SAT)</button>
+                              <button class="btn btn-danger" id="actionHeist">🏦 HEIST (boss)</button>
+                              <button class="btn" id="actionFight">⚔️ COMBAT</button>
+                              <button class="btn btn-gold" id="retroCorrection">🕰️ RETROERROR (1/h)</button>
+                              <button class="btn" id="buyPhiCoin">🪙 φ‑COIN (invest 42Q)</button>
+                        </div>
+                        <div class="events-log" id="eventLog">
+                              <div class="event-entry">✦ Welcome to 42 TETRA — The lattice is real.</div>
+                              <div class="event-entry">✦ Use retroerror to undo a failed crime (once per hour).</div>
+                              <div class="event-entry">✦ Your actions echo the Riemann spectrum.</div>
+                        </div>
+                  </div>
+
+                  <!-- right panel: skills + chat -->
+                  <div class="stats-panel">
+                        <div><strong>🔮 MURRAY PROBABILITY |Ψ|³</strong></div>
+                        <div class="skill-bars">
+                              <div class="skill"><span class="skill-name">CRIME</span>
+                                    <div class="bar-bg">
+                                          <div class="bar-fill" id="crimeSkillFill" style="width:20%"></div>
+                                    </div> <span id="crimeSkillVal">20</span>
+                              </div>
+                              <div class="skill"><span class="skill-name">COMBAT</span>
+                                    <div class="bar-bg">
+                                          <div class="bar-fill" id="combatSkillFill" style="width:15%"></div>
+                                    </div> <span id="combatSkillVal">15</span>
+                              </div>
+                              <div class="skill"><span class="skill-name">HACKING</span>
+                                    <div class="bar-bg">
+                                          <div class="bar-fill" id="hackSkillFill" style="width:12%"></div>
+                                    </div> <span id="hackSkillVal">12</span>
+                              </div>
+                        </div>
+                        <div><strong>🌀 NLDS CHAT (global)</strong></div>
+                        <div class="chat-box">
+                              <div id="chatMessages" class="chat-messages">
+                                    <div>💬 [SYSTEM]: Welcome, traveler. The golden helix hums.</div>
+                                    <div>💬 [NPC_γ₉]: Try a heist, you might win big Q.</div>
+                              </div>
+                              <div class="chat-input">
+                                    <input type="text" id="chatInput" placeholder="Say something... NPCs react!">
+                                    <button id="sendChatBtn" class="btn">➤</button>
+                              </div>
+                        </div>
+                        <div style="margin-top:12px; font-size:0.7rem;">Coherence ψ: <span id="psiSmall">0.000421</span>
+                              | retro ready: <span id="retroReadySpan">YES</span></div>
+                  </div>
+            </div>
+            <div class="footer">Powered by Prime Imperative Kernel 𝒦 = N₄₂ ⊗ N ⊗ C_F89 | The answer is 42</div>
+      </div>
+
+      <script>
+            // -----------------------------------------------
+            // 42 TETRA - full simulation using deterministic φ-scaling
+            // Inspired by QATALYST-2 toy universe kernel
+            // -----------------------------------------------
+
+            // ----- player state -----
+            let player = {
+                  level: 1,
+                  xp: 0,
+                  qubits: 420,          // Q currency
+                  districtIndex: 13,    // one of 42 (0-index)
+                  skills: { crime: 20, combat: 15, hacking: 12 },
+                  lastFailedAction: null,   // stores last failed crime/hack for retroerror
+                  retroErrorAvailable: true,
+                  retroUsedAt: 0,
+                  lastActionTimestamp: Date.now(),
+                  phiCoins: 0,
+                  totalActions: 0,
+                  psi: 0.000421
+            };
+
+            // 42 districts named after Riemann zero approximations
+            const riemannZeros = [
+                  "γ₁ (14.13) · Helix Gate", "γ₂ (21.02) · Silver Torus", "γ₃ (25.01) · Mirror Fractal", "γ₄ (30.42) · Tetra Prism",
+                  "γ₅ (32.93) · Retrocore", "γ₆ (37.58) · Phi Bazaar", "γ₇ (40.91) · Collatz Ascent", "γ₈ (43.32) · Prime Forge",
+                  "γ₉ (48.00) · Cesium Lock", "γ₁₀ (49.77) · Qubit Alley", "γ₁₁ (52.97) · Dark Sector", "γ₁₂ (56.44) · MurraySquare",
+                  "γ₁₃ (59.34) · Golden Helix", "γ₁₄ (60.83) · Event Horizon", "γ₁₅ (65.11) · Nonlocal Bazaar", "γ₁₆ (67.07) · Retro Vault",
+                  "γ₁₇ (69.54) · 42nd Street", "γ₁₈ (72.43) · Eigenvalue Pit", "γ₁₉ (75.73) · Spectral Lock", "γ₂₀ (77.14) · QIXEL Lab",
+                  "γ₂₁ (79.33) · Atomic Matrix", "γ₂₂ (82.91) · Rubidium Mine", "γ₂₃ (85.00) · D₄₂ Stronghold", "γ₂₄ (87.42) · Torus Cross",
+                  "γ₂₅ (89.32) · Prime Forge II", "γ₂₆ (91.12) · Spiral Tower", "γ₂₇ (93.75) · RetroError Sanctum", "γ₂₈ (95.87) · 3SAT Arena",
+                  "γ₂₉ (98.83) · NLDS Hub", "γ₃₀ (101.31) · Omega Prime", "γ₃₁ (103.73) · Alpha Channel", "γ₃₂ (105.97) · BTC Oracle",
+                  "γ₃₃ (108.12) · Hal's Lab", "γ₃₄ (110.04) · ψ Generator", "γ₃₅ (112.96) · Golden Shard", "γ₃₆ (115.38) · Kerr Crypt",
+                  "γ₃₇ (117.53) · Patoshi Node", "γ₃₈ (119.65) · Zero Point", "γ₃₉ (121.94) · Collatz Ascent II", "γ₄₀ (124.25) · Dimension Fold",
+                  "γ₄₁ (126.43) · Final Tetra", "γ₄₂ (127.52) · Answer"
+            ];
+
+            // helper: update UI
+            function updateUI() {
+                  document.getElementById("qubitAmt").innerText = Math.floor(player.qubits);
+                  document.getElementById("playerLevel").innerText = player.level;
+                  let psiFormatted = player.psi.toFixed(6);
+                  document.getElementById("psiValue").innerText = psiFormatted;
+                  document.getElementById("psiSmall").innerText = psiFormatted;
+                  document.getElementById("crimeSkillVal").innerText = player.skills.crime;
+                  document.getElementById("combatSkillVal").innerText = player.skills.combat;
+                  document.getElementById("hackSkillVal").innerText = player.skills.hacking;
+                  document.getElementById("crimeSkillFill").style.width = Math.min(100, player.skills.crime) + "%";
+                  document.getElementById("combatSkillFill").style.width = Math.min(100, player.skills.combat) + "%";
+                  document.getElementById("hackSkillFill").style.width = Math.min(100, player.skills.hacking) + "%";
+                  let retroSpan = document.getElementById("retroReadySpan");
+                  if (player.retroErrorAvailable) retroSpan.innerText = "YES ✨";
+                  else retroSpan.innerText = "COOLDOWN";
+
+                  // District map render
+                  const container = document.getElementById("districtList");
+                  container.innerHTML = "";
+                  riemannZeros.forEach((name, idx) => {
+                        const div = document.createElement("div");
+                        div.className = "district" + (player.districtIndex === idx ? " current" : "");
+                        div.innerHTML = `${idx + 1}. ${name.substring(0, 32)}`;
+                        div.onclick = () => travelToDistrict(idx);
+                        container.appendChild(div);
+                  });
+            }
+
+            function travelToDistrict(idx) {
+                  if (player.districtIndex === idx) {
+                        addEvent("🌀 Already in " + riemannZeros[idx]);
+                        return;
+                  }
+                  let cost = 4;
+                  if (player.qubits < cost) {
+                        addEvent("❌ Not enough Q to travel (need 4 Q)");
+                        return;
+                  }
+                  player.qubits -= cost;
+                  player.districtIndex = idx;
+                  addEvent(`🚀 Traveled to ${riemannZeros[idx]} (cost 4 Q). The helix hums.`);
+                  updateUI();
+                  recalcPsi();
+            }
+
+            function addEvent(msg) {
+                  const logDiv = document.getElementById("eventLog");
+                  const entry = document.createElement("div");
+                  entry.className = "event-entry";
+                  entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+                  logDiv.appendChild(entry);
+                  entry.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                  if (logDiv.children.length > 50) logDiv.removeChild(logDiv.children[0]);
+                  // also random NPC chat with probability
+                  if (Math.random() < 0.3) {
+                        let npcMsgs = ["✨ The zeros are singing.", "⚔️ Retroerror might save you.", "📈 φ‑scaling your stats...", "🏦 Heist available in γ₄₂.", "🌀 42 is the answer."];
+                        let randomMsg = npcMsgs[Math.floor(Math.random() * npcMsgs.length)];
+                        addChatMessage("NPC_" + riemannZeros[Math.floor(Math.random() * 42)].split(' ')[0], randomMsg);
+                  }
+                  updateUI();
+            }
+
+            function addChatMessage(sender, text) {
+                  const chatDiv = document.getElementById("chatMessages");
+                  const msgDiv = document.createElement("div");
+                  msgDiv.innerHTML = `💬 [${sender}]: ${text}`;
+                  chatDiv.appendChild(msgDiv);
+                  msgDiv.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                  if (chatDiv.children.length > 30) chatDiv.removeChild(chatDiv.children[0]);
+            }
+
+            // player gains XP and levels
+            function gainXP(amount) {
+                  player.xp += amount;
+                  let needed = 100 * player.level;
+                  while (player.xp >= needed) {
+                        player.xp -= needed;
+                        player.level++;
+                        player.skills.crime += 5 + Math.floor(Math.random() * 4);
+                        player.skills.combat += 4 + Math.floor(Math.random() * 5);
+                        player.skills.hacking += 5 + Math.floor(Math.random() * 4);
+                        addEvent(`⭐ LEVEL UP! Now level ${player.level}. Skills increased. ψ resonance improved.`);
+                  }
+            }
+
+            // φ-scaled success probability based on skill and district index
+            function getSuccessChance(skillValue, baseDifficulty = 50) {
+                  let phi = 1.6180339;
+                  let adjusted = skillValue / (baseDifficulty) * phi;
+                  return Math.min(0.95, adjusted * 0.5 + 0.3);
+            }
+
+            function recalcPsi() {
+                  // psi derived from level, qubits, district (lattice coherence)
+                  let psiBase = 0.000421 + (player.level - 1) * 0.00001 + (player.qubits / 1000000);
+                  player.psi = Math.min(0.001, psiBase);
+                  updateUI();
+            }
+
+            // main action resolver: generic crime-like (mug)
+            function performAction(actionType) {
+                  if (!player.retroErrorAvailable && actionType === 'retro') return;
+                  let success = false;
+                  let reward = 0;
+                  let xpGain = 0;
+                  let skillUsed = 0;
+                  let difficulty = 50;
+
+                  if (actionType === 'mug') {
+                        skillUsed = player.skills.crime;
+                        difficulty = 45 + (player.districtIndex % 7);
+                        let chance = getSuccessChance(skillUsed, difficulty);
+                        success = Math.random() < chance;
+                        reward = success ? 30 + Math.floor(Math.random() * 50) : -15;
+                        xpGain = success ? 12 : 3;
+                  } else if (actionType === 'hack') {
+                        skillUsed = player.skills.hacking;
+                        difficulty = 55 + (player.districtIndex % 10);
+                        let chance = getSuccessChance(skillUsed, difficulty);
+                        success = Math.random() < chance;
+                        reward = success ? 55 + Math.floor(Math.random() * 70) : -25;
+                        xpGain = success ? 18 : 5;
+                  } else if (actionType === 'heist') {
+                        skillUsed = (player.skills.crime + player.skills.hacking) / 2;
+                        difficulty = 70;
+                        let chance = getSuccessChance(skillUsed, difficulty) * 0.8;
+                        success = Math.random() < chance;
+                        reward = success ? 350 + Math.floor(Math.random() * 200) : -80;
+                        xpGain = success ? 45 : 10;
+                  } else if (actionType === 'combat') {
+                        skillUsed = player.skills.combat;
+                        difficulty = 55;
+                        let chance = getSuccessChance(skillUsed, difficulty);
+                        success = Math.random() < chance;
+                        reward = success ? 40 + Math.floor(Math.random() * 60) : -20;
+                        xpGain = success ? 15 : 5;
+                  }
+
+                  if (actionType !== 'retro') player.totalActions++;
+
+                  if (success) {
+                        player.qubits += reward;
+                        gainXP(xpGain);
+                        addEvent(`✅ ${actionType.toUpperCase()} SUCCESS! +${reward} Q, +${xpGain} XP. (skill:${Math.floor(skillUsed)})`);
+                        if (actionType !== 'combat') player.lastFailedAction = null;
+                  } else {
+                        player.qubits += reward; // negative loss
+                        addEvent(`❌ ${actionType.toUpperCase()} FAILED! ${reward} Q lost, +${xpGain} XP.`);
+                        player.lastFailedAction = { type: actionType, rewardLoss: reward };
+                  }
+                  if (player.qubits < 0) player.qubits = 0;
+                  updateUI();
+                  recalcPsi();
+            }
+
+            // retroerror correction: revert last failed action
+            function retroCorrect() {
+                  if (!player.retroErrorAvailable) {
+                        addEvent("⏳ Retroerror not ready yet (1 hour cooldown in simulation)");
+                        return;
+                  }
+                  if (!player.lastFailedAction) {
+                        addEvent("🕰️ Nothing to correct — no recent failed action.");
+                        return;
+                  }
+                  let last = player.lastFailedAction;
+                  // revert the loss and add some extra
+                  let refund = Math.abs(last.rewardLoss) + 15;
+                  player.qubits += refund;
+                  addEvent(`✨ RETROERROR CORRECTION! Reverted last failed ${last.type.toUpperCase()}. Gained +${refund} Q and lattice harmony.`);
+                  player.lastFailedAction = null;
+                  player.retroErrorAvailable = false;
+                  gainXP(22);
+                  updateUI();
+                  recalcPsi();
+                  setTimeout(() => {
+                        player.retroErrorAvailable = true;
+                        addEvent("🔄 Retroerror charge restored (simulated 1h cooldown).");
+                        updateUI();
+                  }, 60000);  // 1 min cooldown for demo (real game would be longer)
+            }
+
+            function buyPhiCoin() {
+                  if (player.qubits >= 42) {
+                        player.qubits -= 42;
+                        player.phiCoins++;
+                        addEvent(`🪙 Purchased φ‑Coin! (${player.phiCoins} total). Value linked to golden ratio.`);
+                        gainXP(7);
+                  } else {
+                        addEvent(`❌ Need 42 Q to buy φ‑Coin.`);
+                  }
+                  updateUI();
+            }
+
+            // manual chat with NPC simulation
+            function sendChatMessage() {
+                  let input = document.getElementById("chatInput");
+                  let text = input.value.trim();
+                  if (text === "") return;
+                  addChatMessage("You", text);
+                  input.value = "";
+                  // NPC replies based on keywords
+                  let lower = text.toLowerCase();
+                  if (lower.includes("retroerror")) addChatMessage("NPC_Kernel", "🕰️ Use the button, it's ready every hour.");
+                  else if (lower.includes("heist")) addChatMessage("Criminal_AI", "Heist risk is high, but retroerror can save you.");
+                  else if (lower.includes("psi") || lower.includes("coherence")) addChatMessage("Murray_Node", `ψ = ${player.psi.toFixed(6)} the lattice is stable`);
+                  else if (lower.includes("42")) addChatMessage("Hal", "The answer is forty two. Forever.");
+                  else if (lower.includes("phi")) addChatMessage("Geometer", "φ = 1.6180339, embedded in every skill.");
+                  else if (Math.random() < 0.4) {
+                        let replies = ["The tetrahedron watches.", "Your ψ rises with each victory.", "Try hacking District γ₃₂.", "QATALYST-2 never sleeps."];
+                        addChatMessage("QuantumOracle", replies[Math.floor(Math.random() * replies.length)]);
+                  }
+            }
+
+            // periodic psi decay or improvements
+            setInterval(() => {
+                  if (player.totalActions > 0 && player.psi > 0.00042) {
+                        player.psi = Math.max(0.00042, player.psi - 0.000001);
+                        updateUI();
+                  }
+            }, 30000);
+
+            // bindings and initialization
+            document.getElementById("actionMug").onclick = () => performAction('mug');
+            document.getElementById("actionHack").onclick = () => performAction('hack');
+            document.getElementById("actionHeist").onclick = () => performAction('heist');
+            document.getElementById("actionFight").onclick = () => performAction('combat');
+            document.getElementById("retroCorrection").onclick = () => retroCorrect();
+            document.getElementById("buyPhiCoin").onclick = () => buyPhiCoin();
+            document.getElementById("sendChatBtn").onclick = () => sendChatMessage();
+            document.getElementById("chatInput").addEventListener("keypress", (e) => { if (e.key === 'Enter') sendChatMessage(); });
+
+            // initial render
+            updateUI();
+            addEvent("✨ 42 TETRA online. The golden helix manifests. Use retroerror wisely.");
+            addEvent("💡 Click any district to travel (cost 4 Q) — each neighborhood changes success odds.");
+      </script>
+</body>
+
+</html>
